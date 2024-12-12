@@ -1,0 +1,188 @@
+openapi: 3.0.0
+info:
+  title: API Информационных табло
+  description: API для управления контентом, устройствами и получения данных о погоде
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000 # Замените на реальный URL вашего сервера
+
+paths:
+  /api/v1/content:
+    post:
+      summary: Сохранить новое статическое сообщение
+      tags:
+        - Content Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentRequest'
+      responses:
+        '201':
+          description: Сообщение успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentResponse'
+        '400':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      summary: Получить текущее статическое сообщение
+      tags:
+        - Content Management
+      responses:
+        '200':
+          description: Текущее сообщение
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentResponse'
+        '404':
+          description: Сообщение не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/device/update:
+    post:
+      summary: Инициировать отправку сообщения на табло
+      tags:
+        - Device Management
+      responses:
+        '200':
+          description: Сообщение успешно отправлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceUpdateResponse'
+        '500':
+          description: Ошибка при взаимодействии с другими сервисами или MQTT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/weather:
+    get:
+      summary: Получить текущие данные о погоде
+      tags:
+        - Weather
+      responses:
+        '200':
+          description: Текущие данные о погоде
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherResponse'
+        '503':
+          description: Сервис Яндекс.Погоды недоступен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Ошибка обработки данных от API Яндекс.Погоды
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    ContentRequest:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Текст нового сообщения
+      required:
+        - message
+    ContentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID сообщения
+        message:
+          type: string
+          description: Текст сообщения
+        created_at:
+          type: string
+          format: date-time
+          description: Время создания сообщения
+      required:
+        - id
+        - message
+        - created_at
+    DeviceUpdateResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [success]
+          description: Статус операции
+        message:
+          type: string
+          description: Сообщение об успешной отправке
+      required:
+        - status
+        - message
+    WeatherResponse:
+      type: object
+      properties:
+        temperature:
+          type: integer
+          description: Текущая температура (градусы Цельсия)
+        condition:
+          type: string
+          description: Описание погодных условий
+        icon:
+          type: string
+          format: url
+          description: URL иконки погоды
+        feels_like:
+          type: integer
+          description: Температура по ощущению (градусы Цельсия)
+        wind_speed:
+          type: number
+          format: float
+          description: Скорость ветра (м/с)
+        wind_dir:
+          type: string
+          description: Направление ветра
+        pressure_mm:
+          type: integer
+          description: Атмосферное давление (мм рт. ст.)
+        humidity:
+          type: integer
+          description: Относительная влажность (%)
+      required:
+        - temperature
+        - condition
+        - icon
+    Error:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: Описание ошибки
+      required:
+        - detail
