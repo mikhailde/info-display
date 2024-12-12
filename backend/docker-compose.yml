@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   postgres:
-    image: postgres:15
+    image: postgres:latest
     restart: always
     environment:
       POSTGRES_USER: user
@@ -14,7 +12,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   mosquitto:
-    image: eclipse-mosquitto:2.0
+    image: eclipse-mosquitto:latest
     restart: always
     ports:
       - "1883:1883"
