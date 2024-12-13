@@ -10,6 +10,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sirius_network
 
   mosquitto:
     image: eclipse-mosquitto:latest
@@ -18,11 +20,65 @@ services:
       - "1883:1883"
     volumes:
       - mosquitto_data:/mosquitto/data
-      - mosquitto_config:/mosquitto/config
-      - mosquitto_log:/mosquitto/log
+      - ./mosquitto_config:/mosquitto/config
+    networks:
+      - sirius_network
+
+  content:
+    build:
+      context: ../apps/backend/content
+      dockerfile: Dockerfile
+    restart: on-failure
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    env_file:
+      - ../apps/backend/content/.env
+    volumes:
+      - ../apps/backend/content/app:/app
+    networks:
+      - sirius_network
+
+  device:
+    build:
+      context: ../apps/backend/device
+      dockerfile: Dockerfile
+    restart: on-failure
+    ports:
+      - "8001:8000"
+    depends_on:
+      - mosquitto
+      - content
+    env_file:
+      - ../apps/backend/device/.env
+    volumes:
+      - ../apps/backend/device/app:/app
+    networks:
+      - sirius_network
+
+  weather:
+    build:
+      context: ../apps/backend/weather
+      dockerfile: Dockerfile
+    restart: on-failure
+    ports:
+      - "8002:8000"
+    depends_on:
+      - postgres
+    env_file:
+      - ../apps/backend/weather/.env
+    volumes:
+      - ../apps/backend/weather/app:/app
+    networks:
+      - sirius_network
 
 volumes:
   postgres_data:
   mosquitto_data:
   mosquitto_config:
   mosquitto_log:
+
+networks:
+  sirius_network:
+    driver: bridge

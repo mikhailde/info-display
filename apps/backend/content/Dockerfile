@@ -1,17 +1,11 @@
-# Используем официальный образ Python
-FROM python:slim-buster
+FROM python:latest
 
-# Устанавливаем рабочую директорию в контейнере
 WORKDIR /app
 
-# Копируем файл зависимостей
-COPY requirements.txt requirements.txt
+COPY requirements.txt .
 
-# Устанавливаем зависимости
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем исходный код приложения
-COPY . .
+COPY app /app
 
-# Запускаем приложение
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
