@@ -5,8 +5,5 @@ class WeatherResponse(BaseModel):
     condition: str = Field(..., description="Описание погодных условий")
     icon: str = Field(..., description="Ссылка на иконку погоды")
 
-class WeatherData(BaseModel):
-    temperature: int
-    condition: str
-    icon: str
-    updated_at: str # Время обновления данных
+class WeatherData(WeatherResponse):
+    updated_at: str = Field(..., description="Время обновления данных")

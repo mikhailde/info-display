@@ -1,5 +1,5 @@
 import os
 
 YANDEX_WEATHER_API_KEY = os.environ.get("YANDEX_WEATHER_API_KEY")
-LOCATION_LATITUDE = "43.4049"
-LOCATION_LONGITUDE = "39.9594"
+LOCATION_LATITUDE = os.environ.get("LOCATION_LATITUDE", "43.4049")  # Широта Сириус
+LOCATION_LONGITUDE = os.environ.get("LOCATION_LONGITUDE", "39.9594")  # Долгота Сириус
