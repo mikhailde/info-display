@@ -1,51 +1,42 @@
-from fastapi import FastAPI, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
+import logging
 
-import models, schemas  # Импортируем из текущей директории
-from database import engine, get_db
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+import models, schemas
+from database import engine, SessionLocal
+
+# Настройка логирования
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(
-    title="Content Management Service",
-    description="Сервис управления статическим контентом",
-    version="0.1.0",
-)
+app = FastAPI()
 
-@app.post(
-    "/api/v1/content",
-    response_model=schemas.Content,
-    status_code=status.HTTP_201_CREATED,
-    tags=["Content"],
-)
-def create_content(content: schemas.ContentCreate, db: Session = Depends(get_db)):
-    """
-    Создание нового сообщения.
-
-    - **message**: Текст сообщения.
-    """
+# Dependency
+def get_db():
+    db = SessionLocal()
     try:
-        db_content = models.Content(**content.model_dump())
-        db.add(db_content)
-        db.commit()
-        db.refresh(db_content)
-        return db_content
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Такое сообщение уже существует",
-        )
+        yield db
+    finally:
+        db.close()
 
-@app.get("/api/v1/content", response_model=schemas.Content, tags=["Content"])
+@app.post("/api/v1/content/", response_model=schemas.Content)
+def create_content(content: schemas.ContentCreate, db: Session = Depends(get_db)):
+    logger.info(f"Received request to create content: {content}")
+    db_content = models.Content(message=content.message)
+    db.add(db_content)
+    db.commit()
+    db.refresh(db_content)
+    logger.info(f"Content created successfully: {db_content}")
+    return db_content
+
+@app.get("/api/v1/content/", response_model=schemas.Content)
 def read_content(db: Session = Depends(get_db)):
-    """
-    Получение последнего созданного сообщения.
-    """
-    content = db.query(models.Content).order_by(models.Content.created_at.desc()).first()
-    if content:
-        return content
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND, detail="Сообщение не найдено"
-    )
+    logger.info("Received request to read latest content")
+    content = db.query(models.Content).order_by(models.Content.id.desc()).first()
+    if content is None:
+        raise HTTPException(status_code=404, detail="Content not found")
+    logger.info(f"Latest content retrieved successfully: {content}")
+    return content

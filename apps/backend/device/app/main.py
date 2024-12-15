@@ -3,8 +3,8 @@ import httpx
 import os
 import logging
 
-from .mqtt_client import connect_mqtt, publish_message
-from .schemas import ContentResponse
+from mqtt_client import connect_mqtt, publish_message
+from schemas import ContentResponse
 
 # Logging setup
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -18,7 +18,7 @@ app = FastAPI(
 
 router = APIRouter(prefix="/api/v1")
 
-CONTENT_SERVICE_URL = os.getenv("CONTENT_SERVICE_URL", "http://content:8000")
+CONTENT_SERVICE_URL = os.getenv("CONTENT_SERVICE_URL", "http://content:8000/") # Слэш на конце
 DEVICE_ID = os.getenv("DEVICE_ID", "tablo_1")
 
 # MQTT client
@@ -55,7 +55,7 @@ async def update_device():
 
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.get(f"{CONTENT_SERVICE_URL}/api/v1/content")
+            response = await client.get(f"{CONTENT_SERVICE_URL}api/v1/content/")
             response.raise_for_status()
             content = ContentResponse(**response.json())
             publish_message(mqtt_client, content.message, DEVICE_ID)
