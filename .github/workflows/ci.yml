@@ -1,38 +1,40 @@
-name: Build Docker Images
+name: CI
 
 on:
   push:
     branches:
-      - main  # Или ваша основная ветка, например master
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Build Content Management Service image
+      - name: Build and push Content Service
         uses: docker/build-push-action@v4
         with:
-          context: ./backend/content_service
-          push: false
-          tags: content-management-service:latest
+          context: ./services/content # Исправленный путь
+          push: true
+          tags: |
+            your-dockerhub-username/content-management-service:latest
+            your-dockerhub-username/content-management-service:${{ github.sha }}
 
-      - name: Build Device Management Service image
+      - name: Build and push Device Service
         uses: docker/build-push-action@v4
         with:
-          context: ./backend/device_service
-          push: false
-          tags: device-management-service:latest
+          context: ./services/device # Исправленный путь
+          push: true
+          tags: |
+            your-dockerhub-username/device-management-service:latest
+            your-dockerhub-username/device-management-service:${{ github.sha }}
 
-      - name: Build Weather Service image
+      - name: Build and push Weather Service
         uses: docker/build-push-action@v4
         with:
-          context: ./backend/weather_service
-          push: false
-          tags: weather-service:latest
+          context: ./services/weather # Исправленный путь
+          push: true
+          tags: |
+            your-dockerhub-username/weather-service:latest
+            your-dockerhub-username/weather-service:${{ github.sha }}
