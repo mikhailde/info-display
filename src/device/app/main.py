@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, status, APIRouter
+from fastapi.middleware.cors import CORSMiddleware  # Импортируйте CORSMiddleware
 import httpx
 import os
 import logging
@@ -13,6 +14,21 @@ app = FastAPI(
     title="Device Management Service",
     description="Сервис для отправки данных на табло",
     version="0.1.0",
+)
+
+# Добавьте CORS middleware
+origins = [
+    "http://localhost",  # Разрешите запросы от веб-интерфейса, запущенного на localhost
+    "http://localhost:*" # Добавьте, если веб-интерфейс может быть запущен на другом порту
+    # Добавьте другие адреса, если это необходимо
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # Разрешите все методы, включая POST
+    allow_headers=["*"],  # Разрешите все заголовки, включая Content-Type
 )
 
 router = APIRouter(prefix="/api/v1")
