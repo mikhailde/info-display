@@ -1,6 +1,7 @@
 import paho.mqtt.client as mqtt
 import os
 import logging
+import json
 
 # Используем встроенный логгер Uvicorn, если он доступен
 logger = logging.getLogger("uvicorn.error") if "uvicorn" in logging.root.manager.loggerDict else logging.getLogger(__name__)
@@ -8,6 +9,7 @@ logger = logging.getLogger("uvicorn.error") if "uvicorn" in logging.root.manager
 MQTT_BROKER = os.getenv("MQTT_BROKER", "mosquitto")
 MQTT_PORT = int(os.getenv("MQTT_PORT", 1883))
 MQTT_KEEPALIVE = 60
+API_KEY = os.getenv("DEVICE_API_KEY", "your_api_key")
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
@@ -21,7 +23,7 @@ def connect_mqtt() -> mqtt.Client:
     client.on_connect = on_connect
 
     try:
-        print(f"Connecting to MQTT broker at {MQTT_BROKER}:{MQTT_PORT}...") # Добавь эту строку
+        logger.info(f"Connecting to MQTT broker at {MQTT_BROKER}:{MQTT_PORT}...") # Заменили print на logger.info
         client.connect(MQTT_BROKER, MQTT_PORT, MQTT_KEEPALIVE)
         client.loop_start()
         return client

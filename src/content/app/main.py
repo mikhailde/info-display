@@ -21,6 +21,7 @@ app = FastAPI(
     description="Сервис для управления статическим контентом",
     version="0.1.0",
 )
+app.router.on_startup = [] #очистка кэша
 
 # Добавление CORS middleware
 app.add_middleware(
@@ -64,9 +65,10 @@ mqtt_client.loop_start()
 # Эндпоинт для создания контента
 DEVICE_MANAGEMENT_SERVICE_URL = os.getenv("DEVICE_MANAGEMENT_SERVICE_URL", "http://device:8000")
 
-@router.post("/content/", response_model=schemas.Content, status_code=status.HTTP_201_CREATED)
+@router.post("/content", response_model=schemas.Content, status_code=status.HTTP_201_CREATED)
 def create_content(content: schemas.ContentCreate, db: Session = Depends(get_db)):
     """Создает новый контент."""
+    print("DEBUG: create_content function called!")
     logger.info(f"Received request to create content: {content.message}")
     db_content = models.Content(message=content.message)
     db.add(db_content)

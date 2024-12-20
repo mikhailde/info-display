@@ -1,15 +1,16 @@
+const API_KEY = "your_api_key_here"; // Замени на свой API ключ
 const messageInput = document.getElementById("messageText");
 const sendButton = document.getElementById("sendMessageBtn");
 const updateButton = document.getElementById("updateDeviceBtn");
-const notificationDiv = document.getElementById("notification"); // Добавляем ссылку на div для уведомлений
+const notificationDiv = document.getElementById("notification");
 
 function showNotification(message, isError = false) {
   notificationDiv.textContent = message;
-  notificationDiv.className = isError ? "error" : "success"; // Добавляем класс для стилизации (CSS ниже)
+  notificationDiv.className = isError ? "error" : "success";
   setTimeout(() => {
     notificationDiv.textContent = "";
     notificationDiv.className = "";
-  }, 5000); // 5 секунд
+  }, 5000);
 }
 
 function sendMessage() {
@@ -19,40 +20,54 @@ function sendMessage() {
     return;
   }
 
-  fetch('/api/v1/content', { // Исправлено на /api/v1/content
+  fetch('/api/v1/content', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'X-API-Key': API_KEY
     },
     body: JSON.stringify({ message: message })
   })
-  .then(response => {
-    if (response.ok) {
-      showNotification("Сообщение успешно отправлено.");
-      messageInput.value = "";
-    } else {
-      return response.json().then(data => { throw data });
-    }
-  })
-  .catch(error => {
-    showNotification(`Ошибка: ${error.message || error.detail || "Неизвестная ошибка"}`, true);
-  });
+  .then(handleResponse)
+  .catch(handleError);
 }
 
 function updateDevice() {
   fetch('/api/v1/device/update', {
-    method: 'POST'
-  })
-  .then(response => {
-    if (response.ok) {
-      showNotification("Запрос на обновление данных успешно отправлен.");
-    } else {
-      return response.json().then(data => { throw data });
+    method: 'POST',
+    headers: {
+      'X-API-Key': API_KEY
     }
   })
-  .catch(error => {
-    showNotification(`Ошибка: ${error.message || error.detail || "Неизвестная ошибка"}`, true);
-  });
+  .then(handleResponse)
+  .catch(handleError);
+}
+
+function handleResponse(response) {
+  if (response.ok) {
+    // Проверяем, есть ли тело ответа
+    if (response.status === 204) {
+      // Если статус 204 No Content, то тела нет
+      showNotification("Запрос на обновление данных успешно отправлен.");
+      return; // Завершаем выполнение, так как тела нет
+    } else {
+        return response.json().then(data => {
+            if (data && data.message) {
+                showNotification(data.message);
+            } else {
+                showNotification("Операция успешно выполнена.");
+            }
+        });
+    }
+  } else {
+    return response.json().then(data => {
+      throw data;
+    });
+  }
+}
+
+function handleError(error) {
+  showNotification(`Ошибка: ${error.message || error.detail || "Неизвестная ошибка"}`, true);
 }
 
 sendButton.addEventListener("click", sendMessage);

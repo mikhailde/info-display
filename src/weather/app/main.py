@@ -35,6 +35,7 @@ async def _get_raw_weather_data():
             response = await client.get("https://api.weather.yandex.ru/v2/forecast", headers=headers, params=params)
             response.raise_for_status()
             data = response.json()
+            logger.info(f"Successfully fetched weather data from Yandex.Weather API. Status code: {response.status_code}, Response: {data}") # Добавляем лог об успешном ответе
 
         cache["weather_data"] = data
         return data

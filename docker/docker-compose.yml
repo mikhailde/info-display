@@ -26,6 +26,7 @@ services:
       - MQTT_PORT=1883
       - CONTENT_SERVICE_URL=http://content:8000
       - DEVICE_ID=1
+      - DEVICE_API_KEY=${DEVICE_API_KEY}
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     networks:
       - my_network
