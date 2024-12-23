@@ -1,47 +1,120 @@
+/* Общие стили */
 body {
-    font-family: sans-serif;
+    font-family: 'Open Sans', sans-serif; /* Используем Open Sans для основного текста */
+    background-color: #FFFFFF; /* Белый фон */
+    color: #000000; /* Черный текст */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
 }
 
-#messageText {
-    width: 100%;
+.container {
+    width: 90%;
+    max-width: 600px; /* Ограничиваем максимальную ширину */
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #DAA520; /* Тонкая рамка золотисто-коричневого цвета */
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Заголовок */
+.title {
+    font-family: 'Roboto', sans-serif; /* Используем Roboto Bold для заголовка */
+    font-size: 24px;
+    color: #000000; /* Черный цвет */
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Форма */
+.message-form {
+    background-color: #87CEEB; /* Светло-небесный фон */
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.input {
+    width: calc(100% - 20px);
+    padding: 10px;
     margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-family: inherit; /* Наследуем шрифт от родителя */
+    font-size: 16px;
 }
 
-#status {
+/* Группа кнопок */
+.button-group {
+    display: flex;
+    justify-content: space-between; /* Распределяем кнопки по краям */
+    gap: 10px;
+}
+
+.button {
+    padding: 10px 20px;
+    background-color: #DAA520; /* Золотисто-коричневый фон */
+    color: #FFFFFF; /* Белый текст */
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: inherit; /* Наследуем шрифт от родителя */
+    font-size: 16px;
+    flex-grow: 1; /* Кнопки занимают равное пространство */
+}
+
+.button:hover {
+    opacity: 0.8;
+}
+
+/* Уведомления */
+.notification {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid;
+    display: none;
+    /* Скрываем по умолчанию */
+}
+
+.notification.success {
+    display: block;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.notification.error {
+    display: block;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+/* Статус */
+.status {
     margin-top: 10px;
     font-weight: bold;
 }
 
-/* Стили для уведомлений */
-#notification {
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid;
-  display: none; /* Скрываем по умолчанию */
-}
+/* Адаптивность */
+@media (max-width: 480px) {
+    .container {
+        width: 95%;
+    }
 
-#notification.success {
-  display: block;
-  background-color: #d4edda;
-  border-color: #c3e6cb;
-  color: #155724;
-}
+    .button-group {
+        flex-direction: column; /* Кнопки друг под другом на маленьких экранах */
+    }
 
-#notification.error {
-  display: block;
-  background-color: #f8d7da;
-  border-color: #f5c6cb;
-  color: #721c24;
-}body {
-    font-family: sans-serif;
-}
-
-#messageText {
-    width: 100%;
-    margin-bottom: 10px;
-}
-
-#status {
-    margin-top: 10px;
-    font-weight: bold;
+    .button {
+        width: 100%; /* Кнопки на всю ширину */
+    }
 }

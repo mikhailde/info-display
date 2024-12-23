@@ -1,6 +1,5 @@
-from fastapi import FastAPI, HTTPException, status, APIRouter, Depends, Security
+from fastapi import FastAPI, HTTPException, status, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import APIKeyHeader
 import httpx
 import os
 import logging
@@ -37,14 +36,6 @@ router = APIRouter(prefix="/api/v1")
 CONTENT_SERVICE_URL = os.getenv("CONTENT_SERVICE_URL", "http://content:8000")
 DEVICE_ID = os.getenv("DEVICE_ID", "1")
 MQTT_TOPIC_STATUS = f"device/{DEVICE_ID}/status"
-API_KEY = os.getenv("DEVICE_API_KEY", "your_api_key") # Получаем API ключ из переменной окружения
-
-api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
-
-async def get_api_key(api_key_header: str = Security(api_key_header)):
-    if api_key_header == API_KEY:
-        return api_key_header
-    raise HTTPException(status_code=403, detail="Invalid API Key")
 
 # MQTT client
 mqtt_client = None
@@ -76,13 +67,7 @@ async def shutdown_event():
 def on_message(client, userdata, msg):
     """Callback function to handle incoming MQTT messages."""
     try:
-        # Добавляем проверку API ключа в сообщении
         payload = json.loads(msg.payload.decode())
-        api_key = payload.get("api_key")
-
-        if api_key != API_KEY:
-          logger.warning(f"Unauthorized MQTT message from device: {payload.get('device_id')}, topic: {msg.topic}")
-          return
         device_id = payload.get("device_id")
 
         if device_id:
@@ -105,8 +90,7 @@ def on_message(client, userdata, msg):
     "/device/update",
     status_code=status.HTTP_204_NO_CONTENT,
     tags=["Device"],
-    summary="Отправка сообщения на табло",
-    dependencies=[Depends(get_api_key)]
+    summary="Отправка сообщения на табло"
 )
 async def update_device():
     """
@@ -123,8 +107,10 @@ async def update_device():
             response = await client.get(f"{CONTENT_SERVICE_URL}/api/v1/content")
             response.raise_for_status()
             content = response.json()
+            logger.info(f"Received content from Content Service: {content}")
 
         publish_message(mqtt_client, f"device/{DEVICE_ID}/command", content["message"])
+        logger.info(f"Sent message to MQTT topic: device/{DEVICE_ID}/command, message: {content['message']}")
 
     except httpx.HTTPError as e:
         logger.error(f"Content Service unavailable: {e}")
@@ -144,7 +130,6 @@ async def update_device():
     tags=["Device"],
     summary="Получение статуса табло",
     response_model=dict,
-    dependencies=[Depends(get_api_key)]
 )
 async def get_device_status(device_id: str, device_status: Dict = Depends(get_device_status_store)):
     """

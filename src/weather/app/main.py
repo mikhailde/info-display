@@ -18,15 +18,16 @@ app = FastAPI(
 
 router = APIRouter(prefix="/api/v1")
 
-cache = TTLCache(maxsize=1, ttl=5400)  # Кеш на 90 минут
+cache = TTLCache(maxsize=1, ttl=5400)  # Кеш на 90 минут (90*60 = 5400)
 cache_lock = Lock()  # Блокировка для синхронизации доступа к кешу
 
 async def _get_raw_weather_data():
     """Получает сырые данные о погоде от Яндекс.Погоды. Использует кэширование."""
     async with cache_lock:
-        if "weather_data" in cache:
+        cached_data = cache.get("weather_data")
+        if cached_data:
             logger.info("Returning cached weather data.")
-            return cache["weather_data"]
+            return cached_data
 
         logger.info("Fetching weather data from Yandex.Weather API.")
         headers = {"X-Yandex-API-Key": YANDEX_API_KEY}
@@ -35,7 +36,7 @@ async def _get_raw_weather_data():
             response = await client.get("https://api.weather.yandex.ru/v2/forecast", headers=headers, params=params)
             response.raise_for_status()
             data = response.json()
-            logger.info(f"Successfully fetched weather data from Yandex.Weather API. Status code: {response.status_code}, Response: {data}") # Добавляем лог об успешном ответе
+            logger.info(f"Successfully fetched weather data from Yandex.Weather API. Status code: {response.status_code}, Response: {data}")
 
         cache["weather_data"] = data
         return data
@@ -46,7 +47,7 @@ def _format_weather_data(weather_response: dict) -> WeatherData:
     return WeatherData(
         temperature=fact.get("temp"),
         condition=fact.get("condition"),
-        icon=f"https://yastatic.net/weather/i/icons/funky/dark/{fact.get('icon')}.svg",
+        icon=fact.get("icon"), # Теперь передаем только имя иконки
         updated_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     )
 

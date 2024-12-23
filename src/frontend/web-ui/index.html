@@ -3,21 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Отправка сообщений на табло</title>
+    <title>Управление информационным табло</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Отправка сообщений на табло</h1>
-    <div id="notification"></div> 
-    <div>
-        <label for="messageText">Текст сообщения:</label><br>
-        <textarea id="messageText" rows="5" cols="50"></textarea>
+    <div class="container">
+        <h1 class="title">Управление информационным табло</h1>
+        <form class="message-form" id="messageForm">
+            <label for="messageInput" class="label">Текст сообщения:</label>
+            <textarea id="messageInput" class="input" name="message" placeholder="Введите текст сообщения..." rows="5" cols="50"></textarea>
+            <div class="button-group">
+                <button type="submit" class="button" id="sendMessageBtn">Отправить</button>
+                <button type="button" class="button" id="updateDeviceBtn">Обновить</button>
+            </div>
+        </form>
+        <div id="notification" class="notification"></div>
+        <div id="status" class="status"></div>
+        <div class="device-status">
+            <h2>Статус устройства:</h2>
+            <ul id="statusList">
+                <!-- Здесь будут отображаться данные -->
+            </ul>
+        </div>
     </div>
-    <div>
-        <button id="sendMessageBtn">Отправить</button>
-        <button id="updateDeviceBtn">Обновить данные на табло</button>
-    </div>
-    <div id="status"></div>
     <script src="script.js"></script>
 </body>
 </html>
